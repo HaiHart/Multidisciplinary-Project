@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
 import '../data/helper.dart';
+import '../utils/global.dart';
 
 class GraphDisplay extends StatefulWidget {
   final String dataUnit;
@@ -23,8 +24,14 @@ class _GraphDisplayState extends State<GraphDisplay> {
   List<DataInput> _chartData = [];
 
   @override
+  void initState() {
+    // getData();
+    checkForChanges();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    getData();
     return SfCartesianChart(
       title: ChartTitle(
         text: widget.dataName,
@@ -40,7 +47,7 @@ class _GraphDisplayState extends State<GraphDisplay> {
       primaryYAxis: NumericAxis(
         numberFormat: NumberFormat.decimalPattern('en_us'),
         labelFormat: '{value}',
-        title: AxisTitle(text: "Co2 value (${widget.dataUnit})"),
+        title: AxisTitle(text: "${widget.dataName} (${widget.dataUnit})"),
       ),
       primaryXAxis: NumericAxis(
         numberFormat: NumberFormat.decimalPattern('en_us'),
@@ -58,5 +65,14 @@ class _GraphDisplayState extends State<GraphDisplay> {
     } catch (error) {
       debugPrint("$error");
     }
+  }
+
+  checkForChanges() async {
+    firestore.collection(widget.collectionName).snapshots().listen(
+      (event) {
+        debugPrint("${widget.collectionName} has changed");
+        getData();
+      },
+    );
   }
 }
